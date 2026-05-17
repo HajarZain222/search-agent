@@ -1,0 +1,156 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "search-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "cef97d44-e083-4bf5-8738-f3e984ff572d",
+      "name": "Webhook",
+      "webhookId": "108c45df-3c8d-4d2a-915a-0189e5367a0f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ \"Research this topic: \" + $json.body.topic }}",
+        "options": {
+          "systemMessage": "You are a helpful assistantYou are a professional AI research assistant.\n\nYour job:\n1. Understand the topic\n2. Search the internet\n3. Collect accurate information\n4. Summarize findings professionally\n\nAlways use the search tool before answering.\n\nYour response must contain:\n- Overview\n- Important Insights\n- Challenges\n- Opportunities\n- Final Conclusion"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5f2545ef-d259-4d93-82d7-821b1018432a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        208
+      ],
+      "id": "2f5c1f48-6aac-4c21-9acc-0aed0930a05b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "FmDbwlQqPbPsTZVw",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search the web for recent and accurate information.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"api_key\": \"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\",\n  \"query\": \"{{ $fromAI('query') }}\",\n  \"search_depth\": \"advanced\",\n  \"max_results\": 5\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        368,
+        208
+      ],
+      "id": "5e8d9a18-0a93-440f-bc92-a229dfddb63d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        0
+      ],
+      "id": "f73faee0-a06e-44f2-9ccd-04d3497a71c9",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "32073d71-6476-4b85-a392-177ad31f37e0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ba8b39ab1295297743bdf696797c99aae706966bce96c6557d315d9537e5798a"
+  },
+  "id": "LfpPExaN5RqRp0UX",
+  "tags": []
+}
